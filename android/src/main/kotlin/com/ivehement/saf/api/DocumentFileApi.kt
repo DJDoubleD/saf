@@ -61,7 +61,7 @@ internal class DocumentFileApi(private val plugin: SafPlugin) :
       }
       SINGLE_CACHE_TO_EXTERNAL_FILES_DIRECTORY -> {
         if (Build.VERSION.SDK_INT >= API_21) {
-          singleCacheToExternalFilesDir(call, result, util!!)
+          Thread(singleCacheToExternalFilesDir(call, result, util!!)).start()
         }
       }
       CLEAR_CACHED_FILES -> {
