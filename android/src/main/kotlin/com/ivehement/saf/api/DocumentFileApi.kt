@@ -64,6 +64,11 @@ internal class DocumentFileApi(private val plugin: SafPlugin) :
           Thread(singleCacheToExternalFilesDir(call, result, util!!)).start()
         }
       }
+      CREATE_DOCUMENT_FILE_FROM_PATH -> {
+        if (Build.VERSION.SDK_INT >= API_21) {
+          Thread(createDocumentFileFromPath(call, result, plugin.context)).start()
+        }
+      }
       CLEAR_CACHED_FILES -> {
         if (Build.VERSION.SDK_INT >= API_21) {
           result.success(util?.clearCachedFiles(call.argument<String>("cacheDirectoryName") as String))
@@ -536,7 +541,7 @@ internal class DocumentFileApi(private val plugin: SafPlugin) :
         val cacheDirectoryName = call.argument<String>("cacheDirectoryName")
         
         val sourceTreeUri: Uri = Uri.parse(sourceTreeUriString)
-        var sourceChildDocumentsUri = buildChildDocumentsUriUsingTree(sourceTreeUri, context.contentResolver)
+        val sourceChildDocumentsUri = buildChildDocumentsUriUsingTree(sourceTreeUri, context.contentResolver)
   
         val externalFilesDir: File = context.getExternalFilesDir(null)!!
         val appCacheDirectory: File = File(externalFilesDir.path + "/" + cacheDirectoryName)
@@ -577,7 +582,7 @@ internal class DocumentFileApi(private val plugin: SafPlugin) :
         val cacheDirectoryName = call.argument<String>("cacheDirectoryName")
         
         val sourceTreeUri: Uri = Uri.parse(sourceTreeUriString)
-        var sourceChildDocumentsUri = buildChildDocumentsUriUsingTree(sourceTreeUri, context.contentResolver)
+        val sourceChildDocumentsUri = buildChildDocumentsUriUsingTree(sourceTreeUri, context.contentResolver)
   
         val externalFilesDir: File = context.getExternalFilesDir(null)!!
         val appCacheDirectory: File = File(externalFilesDir.path + "/" + cacheDirectoryName)
@@ -604,6 +609,35 @@ internal class DocumentFileApi(private val plugin: SafPlugin) :
         result.success(true)
       } catch (e: Exception) {
         Log.e("SYNCING_EXCEPTION", e.message!!)
+        result.success(null)
+      }
+    }
+  }
+
+  internal class createDocumentFileFromPath(private val call: MethodCall, private val result: MethodChannel.Result, private val context: Context): Runnable {
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    override fun run() {
+      try {
+        val sourceFilePath = call.argument<String>("sourceFilePath")
+        val displayName = call.argument<String>("displayName")
+        val mimeType = call.argument<String>("mimeType")
+        val parentUri = call.argument<String>("parentUriString")
+        val parentDocumentFile = documentFromUri(context, parentUri!!)
+        val createdDocumentFile = parentDocumentFile?.createFile(mimeType!!, displayName!!)
+        val createdDocumentFileUri = createdDocumentFile?.uri.toString()
+
+        val sourceFile = File(sourceFilePath!!)
+        val sourceFileInputStream = sourceFile.inputStream()
+        val createdDocumentFileOutputStream = context.contentResolver.openOutputStream(Uri.parse(createdDocumentFileUri))
+        sourceFileInputStream.copyTo(createdDocumentFileOutputStream!!)
+        sourceFileInputStream.close()
+        createdDocumentFileOutputStream.close()
+
+        Handler(Looper.getMainLooper()).post {
+          result.success(createdDocumentFileUri)
+        }
+      } catch (e: Exception) {
+        Log.e("CREATE_DOCUMENT_FILE_EXCEPTION", e.message!!)
         result.success(null)
       }
     }

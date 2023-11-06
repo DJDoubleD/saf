@@ -213,6 +213,35 @@ class Saf {
     }
   }
 
+  // Returns 'String' on creat a new DocumentFile from path
+  Future<String?> createDocumentFileFromPath({
+    required String? sourceFilePath,
+    required String? displayName,
+    required String? mimeType,
+  }) async {
+    try {
+      const kCreateDocumentFileFromPath = "createDocumentFileFromPath";
+      const kSourceFilePath = "sourceFilePath";
+      const kDisplayName = "displayName";
+      const kMimeType = "mimeType";
+
+      const kParentUriString = "parentUriString";
+
+      final args = <String, dynamic>{
+        kParentUriString: _uriString,
+        kSourceFilePath: sourceFilePath,
+        kDisplayName: displayName,
+        kMimeType: mimeType,
+      };
+      final documentUri = await kDocumentFileChannel.invokeMethod<String?>(
+          kCreateDocumentFileFromPath, args);
+      if (documentUri == null) return null;
+      return documentUri;
+    } catch (e) {
+      return null;
+    }
+  }
+
   /// Will revoke an persistable URI
   ///
   /// Call this when your App no longer wants the permission of an [URI] returned
