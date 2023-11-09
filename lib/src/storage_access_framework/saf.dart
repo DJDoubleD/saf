@@ -142,6 +142,8 @@ class Saf {
   // Request to `cache` the single files from Granted Directory into App's Package [files] folder
   Future<String?> singleCache({
     required String? filePath,
+    bool parentAsTree = false,
+    String? treePath,
     String? directory,
   }) async {
     try {
@@ -150,7 +152,9 @@ class Saf {
       const kSourceUriString = "sourceUriString";
       const kCacheDirectoryName = "cacheDirectoryName";
 
-      var sourceUriString = makeUriString(path: filePath as String);
+      var sourceUriString = makeUriString(
+          path: filePath ?? '',
+          tree: parentAsTree ? null : treePath ?? _directory);
       var cacheDirectoryName = makeDirectoryPathToName(_directory);
       if (directory != null) {
         cacheDirectoryName = makeDirectoryPathToName(directory);

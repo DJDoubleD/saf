@@ -8,23 +8,57 @@ import 'package:saf/src/storage_access_framework/partial_document_file.dart';
 import 'package:saf/src/storage_access_framework/uri_permission.dart';
 
 /// Convert Directory path to URI String
-String makeUriString({String path = "", bool isTreeUri = false}) {
-  String uri = "";
-  String base =
-      "content://com.android.externalstorage.documents/tree/primary%3A";
-  String documentUri = "/document/primary%3A" +
-      path.replaceAll("/", "%2F").replaceAll(" ", "%20");
-  if (isTreeUri) {
-    uri = base + path.replaceAll("/", "%2F").replaceAll(" ", "%20");
-  } else {
-    var pathSegments = path.split("/");
-    var fileName = pathSegments[pathSegments.length - 1];
-    var directory = path.split("/$fileName")[0];
-    uri = base +
-        directory.replaceAll("/", "%2F").replaceAll(" ", "%20") +
-        documentUri;
-  }
-  return uri;
+String makeUriString({
+  String path = "",
+  String? tree,
+  bool isTreeUri = false,
+  String device = 'primary',
+}) {
+  final _path =
+      path.replaceAll(RegExp(r'^(/storage/emulated/\d+/|/sdcard/)'), '');
+  final _tree =
+      tree?.replaceAll(RegExp(r'^(/storage/emulated/\d+/|/sdcard/)'), '');
+
+  final pathSegments = _path.split("/");
+  final treePath =
+      _tree ?? pathSegments.sublist(0, pathSegments.length - 1).join("/");
+
+  const scheme = 'content';
+  const host = 'com.android.externalstorage.documents';
+
+  final documentPathSegments = [
+    '$device:$treePath',
+    'document',
+    '$device:$_path',
+  ];
+
+  Uri _uri = Uri(
+    scheme: scheme,
+    host: host,
+    pathSegments: [
+      'tree',
+      if (isTreeUri) '$device:$_path' else ...documentPathSegments,
+    ],
+  );
+
+  return _uri.toString().replaceAll('$device:', '$device%3A');
+
+  // String uri = "";
+  // String base =
+  //     "content://com.android.externalstorage.documents/tree/primary%3A";
+  // String documentUri = "/document/primary%3A" +
+  //     path.replaceAll("/", "%2F").replaceAll(" ", "%20");
+  // if (isTreeUri) {
+  //   uri = base + path.replaceAll("/", "%2F").replaceAll(" ", "%20");
+  // } else {
+  //   var pathSegments = path.split("/");
+  //   var fileName = pathSegments[pathSegments.length - 1];
+  //   var directory = path.split("/$fileName")[0];
+  //   uri = base +
+  //       directory.replaceAll("/", "%2F").replaceAll(" ", "%20") +
+  //       documentUri;
+  // }
+  // return uri;
 }
 
 /// Convert URI String into Directory path
