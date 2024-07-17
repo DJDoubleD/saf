@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:saf/saf.dart';
 
 /// Edit the Directory Programmatically Here
@@ -12,7 +12,7 @@ void main() {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -69,7 +69,8 @@ class _MyAppState extends State<MyApp> {
             ElevatedButton(
               style: ButtonStyle(
                 backgroundColor:
-                    MaterialStateProperty.all(Colors.deepPurpleAccent),
+                    WidgetStateProperty.all(Colors.deepPurpleAccent),
+                foregroundColor: WidgetStateProperty.all(Colors.white54),
               ),
               onPressed: () async {
                 Saf.releasePersistedPermissions();
@@ -79,7 +80,8 @@ class _MyAppState extends State<MyApp> {
             ElevatedButton(
               style: ButtonStyle(
                 backgroundColor:
-                    MaterialStateProperty.all(Colors.blueGrey.shade700),
+                    WidgetStateProperty.all(Colors.blueGrey.shade700),
+                foregroundColor: WidgetStateProperty.all(Colors.white70),
               ),
               onPressed: () async {
                 var cachedFilesPath = await saf.cache();
@@ -91,20 +93,22 @@ class _MyAppState extends State<MyApp> {
             ),
             ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Colors.green),
+                backgroundColor: WidgetStateProperty.all(Colors.green),
+                foregroundColor: WidgetStateProperty.all(Colors.grey.shade200),
               ),
               onPressed: () async {
-                var isSync = await saf.sync();
-                if (isSync as bool) {
-                  var _paths = await saf.getCachedFilesPath();
-                  loadImage(_paths);
+                var isSync = await saf.sync() ?? false;
+                if (isSync) {
+                  var localPaths = await saf.getCachedFilesPath();
+                  loadImage(localPaths);
                 }
               },
               child: const Text("Sync"),
             ),
             ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Colors.orange),
+                backgroundColor: WidgetStateProperty.all(Colors.orange),
+                foregroundColor: WidgetStateProperty.all(Colors.grey.shade200),
               ),
               onPressed: () async {
                 var isClear = await saf.clearCache();
@@ -120,9 +124,9 @@ class _MyAppState extends State<MyApp> {
         floatingActionButton: FloatingActionButton(
           elevation: 30.0,
           backgroundColor: Colors.black,
-          child: Column(
+          child: const Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children: [
               Text(
                 "GRANT",
                 style: TextStyle(fontSize: 13, color: Colors.red),
