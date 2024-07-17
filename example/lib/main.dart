@@ -124,18 +124,20 @@ class _MyAppState extends State<MyApp> {
         floatingActionButton: FloatingActionButton(
           elevation: 30.0,
           backgroundColor: Colors.black,
-          child: const Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "GRANT",
-                style: TextStyle(fontSize: 13, color: Colors.red),
-              ),
-              Text(
-                "Permission",
-                style: TextStyle(fontSize: 7.8, color: Colors.red),
-              )
-            ],
+          child: const FittedBox(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "GRANT",
+                  style: TextStyle(fontSize: 13, color: Colors.red),
+                ),
+                Text(
+                  "Permission",
+                  style: TextStyle(fontSize: 7.8, color: Colors.red),
+                )
+              ],
+            ),
           ),
           onPressed: () async {
             await saf.getDirectoryPermission(isDynamic: true);
