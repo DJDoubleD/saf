@@ -5,7 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:saf/saf.dart';
 
 /// Edit the Directory Programmatically Here
-const directory = "Android/media/matrix/.neo";
+const directory = "/storage/14F4-2911/Music";
 
 void main() {
   runApp(const MyApp());

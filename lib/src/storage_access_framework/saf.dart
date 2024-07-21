@@ -26,7 +26,7 @@ class Saf {
 
       /// Initial location of native file explorer
       /// when user is prompted to chose the directory
-      String initialUri = makeUriString(path: _directory);
+      String initialUri = makeUriString(path: _directory, isTreeUri: true);
 
       final args = <String, dynamic>{
         kGrantWritePermission: grantWritePermission,

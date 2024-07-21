@@ -14,10 +14,19 @@ String makeUriString({
   bool isTreeUri = false,
   String device = 'primary',
 }) {
-  final _path =
-      path.replaceAll(RegExp(r'^(/storage/emulated/\d+/|/sdcard/)'), '');
-  final _tree =
-      tree?.replaceAll(RegExp(r'^(/storage/emulated/\d+/|/sdcard/)'), '');
+  final externalStorageMatcher =
+      RegExp(r'^(/storage/([A-Z0-9-]+)|/storage/emulated/\d+|/sdcard)/');
+  final match = externalStorageMatcher.firstMatch(path);
+
+  if (match != null && match.group(2) != null) {
+    device =
+        match.group(2) ?? 'primary'; // Extract device ID for external storage
+  }
+
+  final _path = path.replaceFirst(
+      externalStorageMatcher, ''); // Updated path replacement for all cases
+  final _tree = tree?.replaceFirst(externalStorageMatcher,
+      ''); // Updated tree path replacement for all cases
 
   final pathSegments = _path.split("/");
   final treePath =
@@ -42,27 +51,25 @@ String makeUriString({
   );
 
   return _uri.toString().replaceAll('$device:', '$device%3A');
-
-  // String uri = "";
-  // String base =
-  //     "content://com.android.externalstorage.documents/tree/primary%3A";
-  // String documentUri = "/document/primary%3A" +
-  //     path.replaceAll("/", "%2F").replaceAll(" ", "%20");
-  // if (isTreeUri) {
-  //   uri = base + path.replaceAll("/", "%2F").replaceAll(" ", "%20");
-  // } else {
-  //   var pathSegments = path.split("/");
-  //   var fileName = pathSegments[pathSegments.length - 1];
-  //   var directory = path.split("/$fileName")[0];
-  //   uri = base +
-  //       directory.replaceAll("/", "%2F").replaceAll(" ", "%20") +
-  //       documentUri;
-  // }
-  // return uri;
 }
 
 /// Convert URI String into Directory path
 String makeDirectoryPath(String uriString) {
+  final externalStorageMatcher = RegExp(
+      r'^content://com.android.externalstorage.documents/tree/([A-Z0-9-]+|primary)%3A');
+  final match = externalStorageMatcher.firstMatch(uriString);
+
+  if (match != null) {
+    final device =
+        match.group(1) ?? 'primary'; // Extract device ID for external storage
+    final directoryPathUriString = uriString.split('$device%3A')[1];
+    final directoryPath =
+        directoryPathUriString.replaceAll("%2F", "/").replaceAll("%20", " ");
+    return device == 'primary'
+        ? directoryPath
+        : '/storage/$device/$directoryPath';
+  }
+
   String directoryPathUriString = uriString.split("primary%3A")[1];
   String directoryPath =
       directoryPathUriString.replaceAll("%2F", "/").replaceAll("%20", " ");
